@@ -9,7 +9,7 @@
 
 #define FOV 75.0f
 
-#define ROT_SPEED 3.14
+#define ROT_SPEED (3.1415926535/4)
 
 using namespace std;
 
@@ -19,8 +19,48 @@ static const GLfloat g_vertex_buffer_data[] = {
 	1.0f, -1.0f, 0.0f,
 	0.0f,  1.0f, 0.0f,
 };
+GLuint cubeArrayID;
+static const GLfloat cube_data[] = {
+	-1.0f,-1.0f,-1.0f, // triangle 1 : begin
+	-1.0f,-1.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f, // triangle 1 : end
+	1.0f, 1.0f,-1.0f, // triangle 2 : begin
+	-1.0f,-1.0f,-1.0f,
+	-1.0f, 1.0f,-1.0f, // triangle 2 : end
+	1.0f,-1.0f, 1.0f,
+	-1.0f,-1.0f,-1.0f,
+	1.0f,-1.0f,-1.0f,
+	1.0f, 1.0f,-1.0f,
+	1.0f,-1.0f,-1.0f,
+	-1.0f,-1.0f,-1.0f,
+	-1.0f,-1.0f,-1.0f,
+	-1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f,-1.0f,
+	1.0f,-1.0f, 1.0f,
+	-1.0f,-1.0f, 1.0f,
+	-1.0f,-1.0f,-1.0f,
+	-1.0f, 1.0f, 1.0f,
+	-1.0f,-1.0f, 1.0f,
+	1.0f,-1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,
+	1.0f,-1.0f,-1.0f,
+	1.0f, 1.0f,-1.0f,
+	1.0f,-1.0f,-1.0f,
+	1.0f, 1.0f, 1.0f,
+	1.0f,-1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f,-1.0f,
+	-1.0f, 1.0f,-1.0f,
+	1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f,-1.0f,
+	-1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f,
+	1.0f,-1.0f, 1.0f
+};
 // This will identify our vertex buffer
 GLuint vertexbuffer;
+GLuint cubeBuffer;
 
 GLuint programID;
 
@@ -29,22 +69,33 @@ glm::mat4 view = glm::mat4(1.0f);
 glm::mat4 model = glm::mat4(1.0f);
 glm::mat4 mvp = glm::mat4(1.0f);
 GLuint matrixID;
+GLuint colorID;
 
 glm::vec3 camPos;
 double ang;
 
-void init() {
-	glGenVertexArrays(1, &VertexArrayID);
-	glBindVertexArray(VertexArrayID);
+template <typename T, int N>
+void genArray(GLuint* vertId, GLuint* vertBuffer, const T(&vertArray)[N]) {
+	glGenVertexArrays(1, vertId);
+	glBindVertexArray(*vertId);
 	// Generate 1 buffer, put the resulting identifier in vertexbuffer
-	glGenBuffers(1, &vertexbuffer);
+	glGenBuffers(1, vertBuffer);
 	// The following commands will talk about our 'vertexbuffer' buffer
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, *vertBuffer);
 	// Give our vertices to OpenGL.
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, N * sizeof(GLfloat), vertArray, GL_STATIC_DRAW);
+}
+
+
+void init() {
+	genArray(&VertexArrayID, &vertexbuffer, g_vertex_buffer_data);
+	genArray(&cubeArrayID, &cubeBuffer, cube_data);
 	programID = loadShaders("vertex.glsl", "fragment.glsl");
 	matrixID = glGetUniformLocation(programID, "MVP");
+	colorID = glGetUniformLocation(programID, "col");
 	ang = 0;
+	glClearColor(1, 1, 1, 1);
+	glEnable(GL_DEPTH_TEST);
 }
 
 
@@ -70,8 +121,23 @@ void draw(GLFWwindow* window) {
 	);
 	mvp = projection * view * model;
 	glUniformMatrix4fv(matrixID, 1, GL_FALSE, &mvp[0][0]);
+	glUniform3f(colorID, 1.0f, 0.0f, 0.0f);
 	// Draw the triangle !
 	glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
+	model = glm::translate(glm::vec3(0, -2, 0));
+	mvp = projection * view * model;
+	glBindBuffer(GL_ARRAY_BUFFER, cubeBuffer);
+	glVertexAttribPointer(
+		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+	);
+	glUniformMatrix4fv(matrixID, 1, GL_FALSE, &mvp[0][0]);
+	glUniform3f(colorID, 0.0f, 1.0f, 1.0f);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glDisableVertexAttribArray(0);
 }
 
@@ -81,7 +147,7 @@ void update(double elapsed) {
 	if (ang > 2 * glm::pi<float>()) {
 		ang -= glm::pi<float>() * 2;
 	}
-	camPos = glm::eulerAngleXYZ(0.0, ang, 0.0) * glm::vec4(0, 1, -1, 1);
+	camPos = glm::eulerAngleXYZ(0.0, ang, 0.0) * glm::vec4(0, 2, -2, 1);
 }
 
 
