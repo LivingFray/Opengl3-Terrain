@@ -118,11 +118,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="loadShaders.cpp" />
+    <ClCompile Include="camera.cpp" />
+    <ClCompile Include="loaders.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="loadShaders.h" />
+    <ClInclude Include="camera.h" />
+    <ClInclude Include="loaders.h" />
+    <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="fragment.glsl" />

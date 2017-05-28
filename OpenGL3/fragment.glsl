@@ -1,7 +1,8 @@
 #version 330 core
 out vec3 color;
 
-uniform vec3 col;
+in vec2 UV;
+uniform sampler2D tex;
 void main(){
-  color = col;
+  color = texture(tex, UV).rgb;
 }
