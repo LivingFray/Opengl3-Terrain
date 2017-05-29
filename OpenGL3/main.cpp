@@ -14,104 +14,8 @@
 
 #define FOV 75.0f
 
-#define ROT_SPEED (3.1415926535/4)
-
 using namespace std;
-/*
-GLuint VertexArrayID;
-static const GLfloat g_vertex_buffer_data[] = {
-	-1.0f, -1.0f, 0.0f,
-	1.0f, -1.0f, 0.0f,
-	0.0f,  1.0f, 0.0f,
-};
-static const GLfloat triangle_col[] = {
-	1.0f, 0.0f, 0.0f,
-	1.0f, 0.0f, 0.0f,
-	0.0f,  0.0f, 0.0f,
-};
-GLuint cubeArrayID;
-static const GLfloat cube_data[] = {
-	-1.0f,-1.0f,-1.0f,
-	-1.0f,-1.0f, 1.0f,
-	-1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f,-1.0f,
-	-1.0f,-1.0f,-1.0f,
-	-1.0f, 1.0f,-1.0f,
-	1.0f,-1.0f, 1.0f,
-	-1.0f,-1.0f,-1.0f,
-	1.0f,-1.0f,-1.0f,
-	1.0f, 1.0f,-1.0f,
-	1.0f,-1.0f,-1.0f,
-	-1.0f,-1.0f,-1.0f,
-	-1.0f,-1.0f,-1.0f,
-	-1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f,-1.0f,
-	1.0f,-1.0f, 1.0f,
-	-1.0f,-1.0f, 1.0f,
-	-1.0f,-1.0f,-1.0f,
-	-1.0f, 1.0f, 1.0f,
-	-1.0f,-1.0f, 1.0f,
-	1.0f,-1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f,
-	1.0f,-1.0f,-1.0f,
-	1.0f, 1.0f,-1.0f,
-	1.0f,-1.0f,-1.0f,
-	1.0f, 1.0f, 1.0f,
-	1.0f,-1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f,-1.0f,
-	-1.0f, 1.0f,-1.0f,
-	1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f,-1.0f,
-	-1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f, 1.0f,
-	1.0f,-1.0f, 1.0f
-};
-static const GLfloat g_uv_buffer_data[] = {
-	0.0f,0.0f,
-	0.0f,1.0f,
-	1.0f,1.0f,
-	1.0f,1.0f,
-	0.0f,0.0f,
-	0.0f,1.0f,
-	1.0f,1.0f,
-	0.0f,0.0f,
-	1.0f,0.0f,
-	1.0f,1.0f,
-	1.0f,0.0f,
-	0.0f,0.0f,
-	0.0f,0.0f,
-	1.0f,1.0f,
-	1.0f,0.0f,
-	1.0f,1.0f,
-	0.0f,1.0f,
-	0.0f,0.0f,
-	0.0f,1.0f,
-	0.0f,0.0f,
-	1.0f,0.0f,
-	1.0f,1.0f,
-	0.0f,0.0f,
-	1.0f,0.0f,
-	0.0f,0.0f,
-	1.0f,1.0f,
-	0.0f,1.0f,
-	1.0f,1.0f,
-	1.0f,0.0f,
-	0.0f,0.0f,
-	1.0f,1.0f,
-	0.0f,0.0f,
-	0.0f,1.0f,
-	1.0f,1.0f,
-	0.0f,1.0f,
-	1.0f,0.0f
-};
-GLuint cubUVBuffer;
-GLuint triangleColBuffer;
-// This will identify our vertex buffer
-GLuint vertexbuffer;
-GLuint cubeBuffer;
-*/
+
 GLuint programID;
 GLuint texture;
 GLuint matrixID;
@@ -124,6 +28,8 @@ glm::mat4 mvp = glm::mat4(1.0f);
 Camera cam;
 
 Object cube;
+
+Object monkey;
 
 GLFWwindow* window;
 
@@ -153,27 +59,19 @@ void init() {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	/*
-	genArray(&VertexArrayID, &vertexbuffer, g_vertex_buffer_data);
-	genArray(&cubeArrayID, &cubeBuffer, cube_data);
-	glGenBuffers(1, &cubUVBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, cubUVBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_uv_buffer_data), g_uv_buffer_data, GL_STATIC_DRAW);
-	glGenBuffers(1, &triangleColBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, triangleColBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle_col), triangle_col, GL_STATIC_DRAW);
-	*/
 	//Hook into shaders
 	programID = loadShaders("vertex.glsl", "fragment.glsl");
-	matrixID = glGetUniformLocation(programID, "MVP");
 	//Set up opengl
 	glClearColor(1, 1, 1, 1);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);
 	//Create cube
-	cube = Object(texture, matrixID);
+	cube = Object(texture, programID);
 	cube.generateBuffers();
+	monkey = Object(texture, programID, "monkey.obj");
+	monkey.generateBuffers();
+	monkey.setModel(glm::translate(glm::vec3(0, 2, 0)));
 }
 
 
@@ -181,6 +79,7 @@ void draw(GLFWwindow* window) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glUseProgram(programID);
 	cube.draw(cam);
+	monkey.draw(cam);
 }
 
 

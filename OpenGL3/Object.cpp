@@ -5,11 +5,21 @@ Object::Object() {
 	model = glm::mat4(1.0f);
 }
 
-Object::Object(GLuint texture, GLuint matID, const char* add) {
+Object::Object(GLuint texture, GLuint programID, const char* add) {
 	model = glm::mat4(1.0f);
 	loadOBJ(add, verticies, uv, normals);
 	this->texture = texture;
-	matrixID = matID;
+	this->programID = programID;
+	matrixID = glGetUniformLocation(programID, "MVP");
+	viewID = glGetUniformLocation(programID, "V");
+	modelID = glGetUniformLocation(programID, "M");
+	lightID = glGetUniformLocation(programID, "lightPos");
+	lightPos = glm::vec3(2, 2, 0);
+	textureID = glGetUniformLocation(programID, "tex");
+	lightColorID = glGetUniformLocation(programID, "lightColor");
+	lightPowerID = glGetUniformLocation(programID, "lightPower");
+	lightPower = 50;
+	lightColor = glm::vec3(1, 1, 1);
 }
 
 
@@ -43,10 +53,14 @@ void Object::generateBuffers() {
 
 // Draws the object
 void Object::draw(Camera cam) {
+	lightPos = cam.getCameraPos();
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
+	glUniform1i(textureID, 0);
+	//(textureID, texture);
 	//model = glm::translate(glm::vec3(0, -2, 0));
 	glm::mat4 mvp = cam.getProjection() * cam.getView() * model;
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
@@ -56,8 +70,17 @@ void Object::draw(Camera cam) {
 	glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glUniformMatrix4fv(matrixID, 1, GL_FALSE, &mvp[0][0]);
+	glUniformMatrix4fv(viewID, 1, GL_FALSE, &cam.getView()[0][0]);
+	glUniformMatrix4fv(modelID, 1, GL_FALSE, &model[0][0]);
+	glUniform3fv(lightID, 1, &lightPos[0]);
+	glUniform3fv(lightColorID, 1, &lightColor[0]);
+	glUniform1fv(lightPowerID, 1, &lightPower);
 	glDrawArrays(GL_TRIANGLES, 0, verticies.size());
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(2);
+}
+
+void Object::setModel(glm::mat4 m) {
+	model = m;
 }
