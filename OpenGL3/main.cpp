@@ -6,6 +6,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include "camera.h"
+#include "Object.h"
 #include <iostream>
 #include <string>
 
@@ -16,7 +17,7 @@
 #define ROT_SPEED (3.1415926535/4)
 
 using namespace std;
-
+/*
 GLuint VertexArrayID;
 static const GLfloat g_vertex_buffer_data[] = {
 	-1.0f, -1.0f, 0.0f,
@@ -110,19 +111,19 @@ GLuint triangleColBuffer;
 // This will identify our vertex buffer
 GLuint vertexbuffer;
 GLuint cubeBuffer;
-
+*/
 GLuint programID;
-
 GLuint texture;
+GLuint matrixID;
 
 glm::mat4 projection = glm::mat4(1.0f);
 glm::mat4 view = glm::mat4(1.0f);
 glm::mat4 model = glm::mat4(1.0f);
 glm::mat4 mvp = glm::mat4(1.0f);
-GLuint matrixID;
-GLuint texID;
 
 Camera cam;
+
+Object cube;
 
 GLFWwindow* window;
 
@@ -145,12 +146,14 @@ void genArray(GLuint* vertId, GLuint* vertBuffer, const T(&vertArray)[N]) {
 
 void init() {
 	int w, h, c;
+	//Load texture
 	stbi_uc* img = stbi_load("texture.png", &w, &h, &c, 4);
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	/*
 	genArray(&VertexArrayID, &vertexbuffer, g_vertex_buffer_data);
 	genArray(&cubeArrayID, &cubeBuffer, cube_data);
 	glGenBuffers(1, &cubUVBuffer);
@@ -159,75 +162,25 @@ void init() {
 	glGenBuffers(1, &triangleColBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, triangleColBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle_col), triangle_col, GL_STATIC_DRAW);
+	*/
+	//Hook into shaders
 	programID = loadShaders("vertex.glsl", "fragment.glsl");
 	matrixID = glGetUniformLocation(programID, "MVP");
-	texID = glGetUniformLocation(programID, "tex");
+	//Set up opengl
 	glClearColor(1, 1, 1, 1);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);
+	//Create cube
+	cube = Object(texture, matrixID);
+	cube.generateBuffers();
 }
 
 
 void draw(GLFWwindow* window) {
-	//Model transformation here
-	model = glm::mat4(1.0f);
-	view = cam.getView();
-	projection = cam.getProjection();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glUseProgram(programID);
-	glEnableVertexAttribArray(0);
-	glBindTexture(GL_TEXTURE_2D, texture);
-/*
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glVertexAttribPointer(
-		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-		3,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		0,                  // stride
-		(void*)0            // array buffer offset
-	);
-	glBindBuffer(GL_ARRAY_BUFFER, triangleColBuffer);
-	glVertexAttribPointer(
-		1,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-		3,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		0,                  // stride
-		(void*)0            // array buffer offset
-	);
-	mvp = projection * view * model;
-	glUniformMatrix4fv(matrixID, 1, GL_FALSE, &mvp[0][0]);
-
-	glUniform3f(colorID, 1.0f, 1.0f, 1.0f);
-	// Draw the triangle !
-	glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
-	*/
-	//model = glm::translate(glm::vec3(0, -2, 0));
-	mvp = projection * view * model;
-	glBindBuffer(GL_ARRAY_BUFFER, cubeBuffer);
-	glVertexAttribPointer(
-		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-		3,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		0,                  // stride
-		(void*)0            // array buffer offset
-	);
-	glBindBuffer(GL_ARRAY_BUFFER, cubUVBuffer);
-	glVertexAttribPointer(
-		1,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-		2,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		0,                  // stride
-		(void*)0            // array buffer offset
-	);
-	glEnableVertexAttribArray(1);
-	glUniformMatrix4fv(matrixID, 1, GL_FALSE, &mvp[0][0]);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-	glDisableVertexAttribArray(0);
+	cube.draw(cam);
 }
 
 
