@@ -17,9 +17,10 @@ public:
 	void setModel(glm::mat4 m);
 protected:
 	//List of properties for verticies
-	vector<glm::vec3> verticies;
-	vector<glm::vec2> uv;
+	vector<glm::vec3> vertices;
+	vector<glm::vec2> uvs;
 	vector<glm::vec3> normals;
+	vector<unsigned short> indices;
 	//Transformations applied to object
 	glm::mat4 model;
 	//Texture to use for object
@@ -28,6 +29,7 @@ protected:
 	GLuint vertexBuffer;
 	GLuint uvBuffer;
 	GLuint normalsBuffer;
+	GLuint indiciesBuffer;
 	//The program ID for the shaders
 	GLuint programID;
 	GLuint matrixID;

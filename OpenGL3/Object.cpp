@@ -1,5 +1,6 @@
 #include "Object.h"
 #include "objloader.h"
+#include "vboindexer.h"
 
 Object::Object() {
 	model = glm::mat4(1.0f);
@@ -7,7 +8,11 @@ Object::Object() {
 
 Object::Object(GLuint texture, GLuint programID, const char* add) {
 	model = glm::mat4(1.0f);
-	loadOBJ(add, verticies, uv, normals);
+	std::vector<glm::vec3> _vertices;
+	std::vector<glm::vec2> _uvs;
+	std::vector<glm::vec3> _normals;
+	loadOBJ(add, _vertices, _uvs, _normals);
+	indexVBO(_vertices, _uvs, _normals, indices, vertices, uvs, normals);
 	this->texture = texture;
 	this->programID = programID;
 	matrixID = glGetUniformLocation(programID, "MVP");
@@ -35,19 +40,25 @@ void Object::generateBuffers() {
 	glBindVertexArray(id);
 	glGenBuffers(1, &vertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, verticies.size() * sizeof(glm::vec3), &verticies[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
 	//UV
 	glGenVertexArrays(1, &id);
 	glBindVertexArray(id);
 	glGenBuffers(1, &uvBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
-	glBufferData(GL_ARRAY_BUFFER, uv.size() * sizeof(glm::vec2), &uv[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
 	//Normals
 	glGenVertexArrays(1, &id);
 	glBindVertexArray(id);
 	glGenBuffers(1, &normalsBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
 	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
+	//Indicies
+	glGenVertexArrays(1, &id);
+	glBindVertexArray(id);
+	glGenBuffers(1, &indiciesBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indiciesBuffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), &indices[0], GL_STATIC_DRAW);
 }
 
 
@@ -75,7 +86,9 @@ void Object::draw(Camera cam) {
 	glUniform3fv(lightID, 1, &lightPos[0]);
 	glUniform3fv(lightColorID, 1, &lightColor[0]);
 	glUniform1fv(lightPowerID, 1, &lightPower);
-	glDrawArrays(GL_TRIANGLES, 0, verticies.size());
+	//glDrawArrays(GL_TRIANGLES, 0, verticies.size());
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indiciesBuffer);
+	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, (void*)0);
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(2);
