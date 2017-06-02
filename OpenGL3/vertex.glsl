@@ -18,10 +18,10 @@ out vec3 position;
 void main(){
   gl_Position = MVP * vec4(vertexPos, 1);
   UV = vertexUV;
-  position = vertexPos;
-  vec3 vertexPosition_cameraSpace = ( V * M * vec4(vertexPos,1)).xyz;
+  position = (M * vec4(vertexPos, 1)).xyz;
+  vec3 vertexPosition_cameraSpace = ( V * M * vec4(vertexPos, 1)).xyz;
   eyeDirection_cameraSpace = vec3(0,0,0) - vertexPosition_cameraSpace;
-  vec3 lightPosition_cameraSpace = ( V * vec4(lightPos,1)).xyz;
+  vec3 lightPosition_cameraSpace = ( V * vec4(lightPos, 1)).xyz;
   lightDirection_cameraSpace = lightPosition_cameraSpace + eyeDirection_cameraSpace;
   normalDirection_cameraSpace = (V * M * vec4(vertexPos, 0)).xyz; //Doesn't handle scaling
 }

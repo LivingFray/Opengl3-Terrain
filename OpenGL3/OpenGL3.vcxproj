@@ -123,6 +123,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="objloader.cpp" />
+    <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="vboindexer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -131,6 +132,7 @@
     <ClInclude Include="Object.h" />
     <ClInclude Include="objloader.h" />
     <ClInclude Include="stb_image.h" />
+    <ClInclude Include="Terrain.h" />
     <ClInclude Include="vboindexer.h" />
   </ItemGroup>
   <ItemGroup>

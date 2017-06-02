@@ -1,14 +1,14 @@
 #include "loaders.h"
-#include "glm\glm.hpp"
-#include "glm\gtc\matrix_transform.hpp"
-#include "glm\gtx\transform.hpp"
-#include "glm\gtx\euler_angles.hpp"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtx/transform.hpp"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include "camera.h"
 #include "Object.h"
 #include <iostream>
 #include <string>
+#include "Terrain.h"
 
 #define FULLSCREEN 0
 
@@ -18,6 +18,7 @@ using namespace std;
 
 GLuint programID;
 GLuint texture;
+GLuint texture2;
 GLuint matrixID;
 
 glm::mat4 projection = glm::mat4(1.0f);
@@ -30,6 +31,8 @@ Camera cam;
 Object cube;
 
 Object monkey;
+
+Terrain terrain;
 
 GLFWwindow* window;
 
@@ -59,6 +62,12 @@ void init() {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	stbi_uc* img2 = stbi_load("grass.png", &w, &h, &c, 4);
+	glGenTextures(1, &texture2);
+	glBindTexture(GL_TEXTURE_2D, texture2);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, img2);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	//Hook into shaders
 	programID = loadShaders("vertex.glsl", "fragment.glsl");
 	//Set up opengl
@@ -68,9 +77,8 @@ void init() {
 	glEnable(GL_CULL_FACE);
 	//Create cube
 	cube = Object(texture, programID);
-	cube.generateBuffers();
 	monkey = Object(texture, programID, "monkey.obj");
-	monkey.generateBuffers();
+	terrain = Terrain(texture2, programID);
 	monkey.setModel(glm::translate(glm::vec3(0, 2, 0)));
 }
 
@@ -78,8 +86,9 @@ void init() {
 void draw(GLFWwindow* window) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glUseProgram(programID);
-	cube.draw(cam);
+	//cube.draw(cam);
 	monkey.draw(cam);
+	terrain.draw(cam);
 }
 
 
