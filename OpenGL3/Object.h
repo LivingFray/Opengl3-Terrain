@@ -10,13 +10,13 @@ public:
 	Object(GLuint texture, GLuint progID, const char* add = "cube.obj");
 	~Object();
 	// Draws the object
-	void draw(Camera cam);
+	virtual void draw(Camera cam);
 	// Sets the model matrix of the object
 	void setModel(glm::mat4 m);
 protected:
 	void sharedInit();
 	// Creates the buffers for the loaded object
-	void generateBuffers();
+	virtual void generateBuffers();
 	//List of properties for verticies
 	vector<glm::vec3> vertices;
 	vector<glm::vec2> uvs;
@@ -43,5 +43,6 @@ protected:
 	glm::vec3 lightPos;
 	glm::vec3 lightColor;
 	float lightPower;
+	bool cull;
 };
 

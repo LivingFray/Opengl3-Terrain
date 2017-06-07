@@ -17,11 +17,10 @@ void main(){
   vec3 l = normalize(lightDirection_cameraSpace);
   vec3 e = normalize(eyeDirection_cameraSpace);
   vec3 r = reflect(-l, n);
-  float d = length(lightPos - position);
   vec3 matCol = texture(tex, UV).rgb;
-  vec3 ambient = vec3(0.4, 0.4, 0.4) * matCol;
+  vec3 ambient = vec3(0,0,0) * matCol;
   vec3 specCol = vec3(0, 0, 0);
   color = ambient
-        + matCol * lightColor * lightPower * clamp(dot(n, l), 0, 1) / (d * d)
-		+ specCol * lightColor * lightPower * pow(clamp(dot(e, r), 0, 1), 5) / (d * d);
+        + matCol * lightColor * lightPower * clamp(dot(n, l), 0, 1)
+        + specCol * lightColor * lightPower * pow(clamp(dot(e, r), 0, 1), 5);
 }

@@ -15,6 +15,7 @@ Object::Object(GLuint texture, GLuint programID, const char* add){
 	this->programID = programID;
 	sharedInit();
 	generateBuffers();
+	cull = true;
 }
 
 void Object::sharedInit() {
@@ -23,11 +24,11 @@ void Object::sharedInit() {
 	viewID = glGetUniformLocation(programID, "V");
 	modelID = glGetUniformLocation(programID, "M");
 	lightID = glGetUniformLocation(programID, "lightPos");
-	lightPos = glm::vec3(0, 50, 0);
+	lightPos = glm::vec3(0, 5000, 0);
 	textureID = glGetUniformLocation(programID, "tex");
 	lightColorID = glGetUniformLocation(programID, "lightColor");
 	lightPowerID = glGetUniformLocation(programID, "lightPower");
-	lightPower = 5000;
+	lightPower = 1;
 	lightColor = glm::vec3(1, 1, 1);
 }
 
@@ -68,6 +69,11 @@ void Object::generateBuffers() {
 
 // Draws the object
 void Object::draw(Camera cam) {
+	if(cull) {
+		glEnable(GL_CULL_FACE);
+	}else {
+		glDisable(GL_CULL_FACE);
+	}
 	//lightPos = cam.getCameraPos();
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
@@ -95,6 +101,7 @@ void Object::draw(Camera cam) {
 	glDisableVertexAttribArray(2);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
+
 
 void Object::setModel(glm::mat4 m) {
 	model = m;

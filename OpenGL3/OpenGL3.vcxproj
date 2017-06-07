@@ -137,7 +137,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="fragment.glsl" />
+    <None Include="fragment_sunlight.glsl" />
     <None Include="vertex.glsl" />
+    <None Include="vertex_sunlight.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

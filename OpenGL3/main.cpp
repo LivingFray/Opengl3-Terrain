@@ -69,9 +69,9 @@ void init() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	//Hook into shaders
-	programID = loadShaders("vertex.glsl", "fragment.glsl");
+	programID = loadShaders("vertex_sunlight.glsl", "fragment_sunlight.glsl");
 	//Set up opengl
-	glClearColor(1, 1, 1, 1);
+	glClearColor(135.0f/255.0f, 206.0f/255.0f, 235.0f/255.0f, 1.0f);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);

@@ -44,6 +44,12 @@
     <None Include="fragment.glsl">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="fragment_sunlight.glsl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="vertex_sunlight.glsl">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="loaders.h">
