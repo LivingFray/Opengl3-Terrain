@@ -19,6 +19,7 @@ using namespace std;
 GLuint programID;
 GLuint texture;
 GLuint texture2;
+GLuint texture3;
 GLuint matrixID;
 
 glm::mat4 projection = glm::mat4(1.0f);
@@ -68,6 +69,12 @@ void init() {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, img2);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	stbi_uc* img3 = stbi_load("uv.png", &w, &h, &c, 4);
+	glGenTextures(1, &texture3);
+	glBindTexture(GL_TEXTURE_2D, texture3);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, img3);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	//Hook into shaders
 	programID = loadShaders("vertex_sunlight.glsl", "fragment_sunlight.glsl");
 	//Set up opengl
@@ -77,10 +84,11 @@ void init() {
 	glEnable(GL_CULL_FACE);
 	//Create cube
 	cube = Object(texture, programID);
-	monkey = Object(texture, programID, "monkey.obj");
+	monkey = Object(texture, programID, "monkey.obj", texture3);
 	terrain = Terrain(texture2, programID);
-	monkey.setModel(glm::translate(glm::vec3(0, 2, 0)));
+	monkey.setModel(glm::translate(glm::vec3(0, 250, 0)));
 	cam.setCameraPos(glm::vec3(0, 250, 0));
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 }
 
 

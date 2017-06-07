@@ -5,17 +5,22 @@
 Object::Object() {
 }
 
-Object::Object(GLuint texture, GLuint programID, const char* add){
+Object::Object(GLuint texture, GLuint programID, const char* add, GLuint normal){
+	cull = true;
+	useNormal = true;
 	vector<glm::vec3> _vertices;
 	vector<glm::vec2> _uvs;
 	vector<glm::vec3> _normals;
+	vector<glm::vec3> _tangents;
+	vector<glm::vec3> _bitangents;
 	loadOBJ(add, _vertices, _uvs, _normals);
-	indexVBO(_vertices, _uvs, _normals, indices, vertices, uvs, normals);
+	computeTangentBasis(_vertices, _uvs, _normals, _tangents, _bitangents);
+	indexVBO_TBN(_vertices, _uvs, _normals, _tangents, _bitangents, indices, vertices, uvs, normals, tangents, bitangents);
 	this->texture = texture;
+	this->normal = normal;
 	this->programID = programID;
 	sharedInit();
 	generateBuffers();
-	cull = true;
 }
 
 void Object::sharedInit() {
@@ -32,6 +37,9 @@ void Object::sharedInit() {
 	lightColor = glm::vec3(1, 1, 1);
 	fogID = glGetUniformLocation(programID, "fogCol");
 	fogColor = glm::vec3(135.0f / 255.0f, 206.0f / 255.0f, 235.0f / 255.0f);
+	modelViewID = glGetUniformLocation(programID, "MV3x3");
+	normalID = glGetUniformLocation(programID, "normal");
+	useNormalID = glGetUniformLocation(programID, "useNormal");
 }
 
 
@@ -65,7 +73,17 @@ void Object::generateBuffers() {
 	glBindVertexArray(id);
 	glGenBuffers(1, &indiciesBuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indiciesBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), &indices[0], GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+	if (useNormal) {
+		//Tangents
+		glGenBuffers(1, &tangentBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, tangentBuffer);
+		glBufferData(GL_ARRAY_BUFFER, tangents.size() * sizeof(glm::vec3), &tangents[0], GL_STATIC_DRAW);
+		//Bitangents
+		glGenBuffers(1, &bitangentBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, bitangentBuffer);
+		glBufferData(GL_ARRAY_BUFFER, bitangents.size() * sizeof(glm::vec3), &bitangents[0], GL_STATIC_DRAW);
+	}
 }
 
 
@@ -76,32 +94,53 @@ void Object::draw(Camera cam) {
 	}else {
 		glDisable(GL_CULL_FACE);
 	}
-	//lightPos = cam.getCameraPos();
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
+	if (useNormal) {
+		glEnableVertexAttribArray(3);
+		glEnableVertexAttribArray(4);
+	}
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glUniform1i(textureID, 0);
+	if (useNormal) {
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, normal);
+		glUniform1i(normalID, 1);
+	}
 	glm::mat4 mvp = cam.getProjection() * cam.getView() * model;
+	glm::mat3 mv = glm::mat3(cam.getView() * model);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)nullptr);
 	glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)nullptr);
 	glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)nullptr);
+	if (useNormal) {
+		glBindBuffer(GL_ARRAY_BUFFER, tangentBuffer);
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, (void*)nullptr);
+		glBindBuffer(GL_ARRAY_BUFFER, bitangentBuffer);
+		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, (void*)nullptr);
+	}
 	glUniformMatrix4fv(matrixID, 1, GL_FALSE, &mvp[0][0]);
 	glUniformMatrix4fv(viewID, 1, GL_FALSE, &cam.getView()[0][0]);
 	glUniformMatrix4fv(modelID, 1, GL_FALSE, &model[0][0]);
+	glUniformMatrix3fv(modelViewID, 1, GL_FALSE, &mv[0][0]);
 	glUniform3fv(lightID, 1, &lightPos[0]);
 	glUniform3fv(lightColorID, 1, &lightColor[0]);
 	glUniform1fv(lightPowerID, 1, &lightPower);
 	glUniform3fv(fogID, 1, &fogColor[0]);
+	glUniform1i(useNormalID, useNormal);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indiciesBuffer);
-	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, (void*)nullptr);
+	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void*)nullptr);
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(2);
+	if (useNormal) {
+		glDisableVertexAttribArray(3);
+		glDisableVertexAttribArray(4);
+	}
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 

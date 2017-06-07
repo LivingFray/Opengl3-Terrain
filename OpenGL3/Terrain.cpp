@@ -25,12 +25,13 @@ Terrain::Terrain() {
 Terrain::Terrain(GLuint texture, GLuint programID) {
 	this->programID = programID;
 	this->texture = texture;
+	cull = false;
+	useNormal = false;
 	Object::sharedInit();
-	generateTerrain();
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	cull = false;
+	generateTerrain();
 }
 
 
@@ -230,71 +231,4 @@ void Terrain::generateTerrain() {
 	normals = norm;
 	indices = ind;
 	generateBuffers();
-}
-
-
-
-// Creates the buffers for the loaded object
-void Terrain::generateBuffers() {
-	GLuint id;
-	//Verticies
-	glGenVertexArrays(1, &id);
-	glBindVertexArray(id);
-	glGenBuffers(1, &vertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
-	//UV
-	glGenVertexArrays(1, &id);
-	glBindVertexArray(id);
-	glGenBuffers(1, &uvBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
-	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
-	//Normals
-	glGenVertexArrays(1, &id);
-	glBindVertexArray(id);
-	glGenBuffers(1, &normalsBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
-	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
-	//Indicies
-	glGenVertexArrays(1, &id);
-	glBindVertexArray(id);
-	glGenBuffers(1, &indiciesBuffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indiciesBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
-}
-
-
-// Draws the object
-void Terrain::draw(Camera cam) {
-	if (cull) {
-		glEnable(GL_CULL_FACE);
-	} else {
-		glDisable(GL_CULL_FACE);
-	}
-	//lightPos = cam.getCameraPos();
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glUniform1i(textureID, 0);
-	glm::mat4 mvp = cam.getProjection() * cam.getView() * model;
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)nullptr);
-	glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)nullptr);
-	glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)nullptr);
-	glUniformMatrix4fv(matrixID, 1, GL_FALSE, &mvp[0][0]);
-	glUniformMatrix4fv(viewID, 1, GL_FALSE, &cam.getView()[0][0]);
-	glUniformMatrix4fv(modelID, 1, GL_FALSE, &model[0][0]);
-	glUniform3fv(lightID, 1, &lightPos[0]);
-	glUniform3fv(lightColorID, 1, &lightColor[0]);
-	glUniform1fv(lightPowerID, 1, &lightPower);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indiciesBuffer);
-	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void*)nullptr);
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-	glDisableVertexAttribArray(2);
-	glBindTexture(GL_TEXTURE_2D, 0);
 }
