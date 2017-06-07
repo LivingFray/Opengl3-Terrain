@@ -1,7 +1,6 @@
 #include "camera.h"
-#include "glm\gtc\constants.hpp"
-#include "glm\gtc\matrix_transform.hpp"
-#include <iostream>
+#include "glm/gtc/constants.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 void Camera::calculateCamera(GLFWwindow* win, double time) {
 	//Get information from glfw
@@ -41,19 +40,20 @@ void Camera::calculateCamera(GLFWwindow* win, double time) {
 	//Create up vector
 	up = glm::cross(right, dir);
 	//Move camera
+	float speed = glfwGetKey(win, GLFW_KEY_LEFT_SHIFT) || glfwGetKey(win, GLFW_KEY_RIGHT_SHIFT) ? 10.0f : 1.0f;
 	if (glfwGetKey(win, GLFW_KEY_UP) == GLFW_PRESS) {
-		pos += dir * static_cast<float>(camSpeed * time);
+		pos += dir * static_cast<float>(speed * camSpeed * time);
 	}
 	if (glfwGetKey(win, GLFW_KEY_DOWN) == GLFW_PRESS) {
-		pos -= dir * static_cast<float>(camSpeed * time);
+		pos -= dir * static_cast<float>(speed * camSpeed * time);
 	}
 	if (glfwGetKey(win, GLFW_KEY_LEFT) == GLFW_PRESS) {
-		pos -= right * static_cast<float>(camSpeed * time);
+		pos -= right * static_cast<float>(speed * camSpeed * time);
 	}
 	if (glfwGetKey(win, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-		pos += right * static_cast<float>(camSpeed * time);
+		pos += right * static_cast<float>(speed * camSpeed * time);
 	}
-	projection = glm::perspective(glm::radians(FOV), static_cast<float>(w) / static_cast<float>(h), 0.1f, 100.0f);
+	projection = glm::perspective(glm::radians(FOV), static_cast<float>(w) / static_cast<float>(h), 0.1f, 400.0f);
 	view = glm::lookAt(pos, pos + dir, up);
 }
 

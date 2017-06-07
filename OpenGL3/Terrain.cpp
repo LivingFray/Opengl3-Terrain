@@ -6,12 +6,10 @@
 #define NODES_X ((1 << N) + 1)
 #define NODES_Z NODES_X
 
-#define WIDTH 40.0
-#define DEPTH 40.0
-//#define NODES_X 40
-//#define NODES_Z 40
-#define MIN_Y (0.0)
-#define MAX_Y (12.0)
+#define WIDTH 800.0
+#define DEPTH 800.0
+#define MIN_Y (-100.0)
+#define MAX_Y (200.0)
 #define REPEAT 20.0
 
 #define ROUGHNESS 1.0
@@ -115,7 +113,7 @@ void Terrain::generateTerrain() {
 				getNode(px, pz).y = h + u(rng);
 			}
 		}
-		rand_var *= pow(2,-ROUGHNESS);
+		rand_var *= static_cast<float>(pow(2,-ROUGHNESS));
 		size = size / 2;
 	}
 	//Convert to buffers

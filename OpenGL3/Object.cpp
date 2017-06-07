@@ -30,6 +30,8 @@ void Object::sharedInit() {
 	lightPowerID = glGetUniformLocation(programID, "lightPower");
 	lightPower = 1;
 	lightColor = glm::vec3(1, 1, 1);
+	fogID = glGetUniformLocation(programID, "fogCol");
+	fogColor = glm::vec3(135.0f / 255.0f, 206.0f / 255.0f, 235.0f / 255.0f);
 }
 
 
@@ -94,6 +96,7 @@ void Object::draw(Camera cam) {
 	glUniform3fv(lightID, 1, &lightPos[0]);
 	glUniform3fv(lightColorID, 1, &lightColor[0]);
 	glUniform1fv(lightPowerID, 1, &lightPower);
+	glUniform3fv(fogID, 1, &fogColor[0]);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indiciesBuffer);
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, (void*)nullptr);
 	glDisableVertexAttribArray(0);

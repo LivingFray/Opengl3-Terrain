@@ -40,8 +40,10 @@ protected:
 	GLuint textureID;
 	GLuint lightPowerID;
 	GLuint lightColorID;
+	GLuint fogID;
 	glm::vec3 lightPos;
 	glm::vec3 lightColor;
+	glm::vec3 fogColor;
 	float lightPower;
 	bool cull;
 };

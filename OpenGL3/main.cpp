@@ -80,6 +80,7 @@ void init() {
 	monkey = Object(texture, programID, "monkey.obj");
 	terrain = Terrain(texture2, programID);
 	monkey.setModel(glm::translate(glm::vec3(0, 2, 0)));
+	cam.setCameraPos(glm::vec3(0, 250, 0));
 }
 
 
